@@ -117,7 +117,7 @@ contract Voting {
   function createBallot(
     string memory name,
     string[] memory _choices
-    ) public onlyAdmin() {
+    ) public onlyChairman() {
       ballots[nextBallotId].id = nextBallotId;
       ballots[nextBallotId].name = name;
       for(uint i = 0; i < _choices.length ; i++) {

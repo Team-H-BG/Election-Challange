@@ -126,6 +126,13 @@ contract Voting {
       nextBallotId++;
   }
 
+  /*
+    * get ballot
+  */
+
+  function getBallot(uint _id) external view returns (Ballot memory) {
+    return ballots[_id];
+  }
 
 
   modifier onlyAdmin() {

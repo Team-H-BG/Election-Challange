@@ -82,8 +82,15 @@ contract Voting {
   /*
     * set voting result
   */
-  function setVotingResult(bool _votingResult) external onlyAuthorized() {
+  function setVotingResultStatus(bool _votingResult) external onlyAuthorized() {
     votingResult = _votingResult;
+  }
+
+    /*
+    * view voting status
+  */
+  function getVotingResultStatus() external view returns (bool) {
+    return votingResult;
   }
 
   /*
@@ -107,7 +114,7 @@ contract Voting {
   /*
     * create ballot
   */
-    function createBallot(
+  function createBallot(
     string memory name,
     string[] memory _choices
     ) public onlyAdmin() {
@@ -119,6 +126,8 @@ contract Voting {
       nextBallotId++;
   }
 
+
+
   modifier onlyAdmin() {
     require(msg.sender == admin, 'only admin');
     _;
@@ -126,6 +135,11 @@ contract Voting {
 
   modifier onlyAuthorized() {
     require((msg.sender == chairman) || (teachers[msg.sender] == true), 'only the chairman or authorized teacher');
+    _;
+  }
+
+    modifier onlyAuthorizedToVote() {
+    require((msg.sender == chairman) || (teachers[msg.sender] == true) || (students[msg.sender] == true), 'only the chairman or authorized teacher');
     _;
   }
 

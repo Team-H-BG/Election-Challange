@@ -5,7 +5,7 @@
       "chainId": "4",
       "contracts": {
         "Voting": {
-          "address": "0x3fE5Bc895Af170d73FDe4234401763A48f2dF806",
+          "address": "0x82F2Ed52788D5142fc1179b8BeA3A7044423f278",
           "abi": [
             {
               "inputs": [],
@@ -164,6 +164,42 @@
             {
               "inputs": [
                 {
+                  "internalType": "uint256",
+                  "name": "ballotId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "results",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "id",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "votes",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Voting.Choice[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
                   "internalType": "address",
                   "name": "_chairman",
                   "type": "address"
@@ -236,6 +272,24 @@
                 }
               ],
               "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "ballotId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "choiceId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "vote",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             }
           ]

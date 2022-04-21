@@ -4,7 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "chain": "hardhat node --network hardhat --no-deploy",
+    "compile": "hardhat compile",
+    "deploy": "hardhat deploy --export-all ./frontend/src/contracts/hardhat_contracts.json",
+    "test": "hardhat test",
+    "accounts": "hardhat accounts",
+    "balance": "hardhat balance",
+    "generate": "hardhat generate",
+    "account": "hardhat account",
+    "verify": "hardhat etherscan-verify --api-key M72G1HQ5A3C3YQ4DZWTNUP448R57AJPTGA"
   },
   "repository": {
     "type": "git",
@@ -19,13 +27,17 @@
   "homepage": "https://github.com/Oluwatobilobaoke/Election-Challange#readme",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "chai": "^4.3.6",
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.4",
-    "hardhat": "^2.9.3"
+    "hardhat": "^2.9.3",
+    "hardhat-gas-reporter": "^1.0.8"
   },
   "dependencies": {
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.0",
+    "ganache-cli": "^6.12.2",
+    "solidity-coverage": "^0.7.20"
   }
 }

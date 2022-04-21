@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/Voting.sol": {
+      "content": "// SPDX-License-Identifier: MIT\n\npragma solidity ^0.8.5;\n\n\ncontract Voting {\n\n  /*\n    * get teachers list\n  */\n  mapping(address => bool) public teachers;\n\n  /*\n    * get student list\n  */\n  mapping(address => bool) public students;\n\n  address public admin;\n\n  address public chairman;\n\n  /*\n    * get voting status\n  */\n  bool votingEnabled;\n\n  /*\n    * get voting result\n  */\n  bool votingResult;\n\n\n  /*\n    * struct for voting choices\n  */\n\n  struct Choice {\n    uint id;\n    string name;\n    uint votes;\n  }\n\n  /*\n    * struct for voting Ballot\n  */\n  struct Ballot {\n    uint id;\n    string name;\n    Choice[] choices;\n  }\n\n  mapping(uint => Ballot) ballots;\n  uint nextBallotId;\n  mapping(address => mapping(uint => bool)) votes;\n\n  constructor() {\n    admin = msg.sender;\n  }\n\n  /*\n    * set chairman\n  */\n  function setChairman(address _chairman) external onlyAdmin() {\n    chairman = _chairman;\n  }\n\n  /*\n    * set voting status\n  */\n  function setVotingStatus(bool _votingStatus) external {\n    require(msg.sender == chairman);\n    votingEnabled = _votingStatus;\n  }\n\n  /*\n    * view voting status\n  */\n  function getVotingStatus() external view returns (bool) {\n    return votingEnabled;\n  }\n\n  /*\n    * set voting result\n  */\n  function setVotingResultStatus(bool _votingResult) external onlyAuthorized() {\n    votingResult = _votingResult;\n  }\n\n    /*\n    * view voting status\n  */\n  function getVotingResultStatus() external view returns (bool) {\n    return votingResult;\n  }\n\n  /*\n    * add teacher\n  */\n  function addTeachers(address[] calldata _teachers) external onlyAdmin() {\n    for(uint i = 0; i < _teachers.length; i++) {\n        teachers[_teachers[i]] = true;\n    }\n  }\n\n  /*\n    * add stuudent\n  */\n  function addStudents(address[] calldata _students) external onlyAdmin() {\n    for(uint i = 0; i < _students.length; i++) {\n        students[_students[i]] = true;\n    }\n  }\n\n  /*\n    * create ballot\n  */\n  function createBallot(\n    string memory name,\n    string[] memory _choices\n    ) public onlyChairman() {\n      ballots[nextBallotId].id = nextBallotId;\n      ballots[nextBallotId].name = name;\n      for(uint i = 0; i < _choices.length ; i++) {\n        ballots[nextBallotId].choices.push(Choice(i, _choices[i], 0));\n      }\n      nextBallotId++;\n  }\n\n  /*\n    * get ballot\n  */\n\n  function getBallot(uint _id) external view returns (Ballot memory) {\n    return ballots[_id];\n  }\n\n\n  modifier onlyAdmin() {\n    require(msg.sender == admin, 'only admin');\n    _;\n  }\n\n  modifier onlyAuthorized() {\n    require((msg.sender == chairman) || (teachers[msg.sender] == true), 'only the chairman or authorized teacher');\n    _;\n  }\n\n    modifier onlyAuthorizedToVote() {\n    require((msg.sender == chairman) || (teachers[msg.sender] == true) || (students[msg.sender] == true), 'only the chairman or authorized teacher');\n    _;\n  }\n\n  modifier onlyChairman() {\n    require(msg.sender == chairman, 'only chairman');\n    _;\n  }\n\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

@@ -1,6 +1,12 @@
-require("@nomiclabs/hardhat-waffle");
-require('dotenv').config();
+const { utils } = require("ethers");
 const fs = require("fs");
+
+// deploy helper
+require('hardhat-deploy');
+
+require('dotenv').config();
+
+require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-etherscan");
 //require solidity-coverage
@@ -9,15 +15,16 @@ require('solidity-coverage');
 require("hardhat-gas-reporter");
 
 
+
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
+// task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+//   const accounts = await hre.ethers.getSigners();
 
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
+//   for (const account of accounts) {
+//     console.log(account.address);
+//   }
+// });
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -43,7 +50,7 @@ function mnemonic() {
 
 module.exports = {
    solidity: "0.8.5",
-   defaultNetwork: "localhost",
+   defaultNetwork: "rinkeby",
    networks: {
       localhost: {
          url: "http://localhost:8545",
@@ -57,9 +64,13 @@ module.exports = {
          },
       }
    },
+   namedAccounts: {
+    deployer: {
+      default: 0, // here this will by default take the first account as deployer
+    },
+  },
    etherscan: {
       // your api key here.
       apiKey: "PSW8C433Q667DVEX5BCRMGNAH9FSGFZ7Q8",
-    },
-    
+    },  
 }

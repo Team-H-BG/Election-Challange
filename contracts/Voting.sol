@@ -57,6 +57,7 @@ contract Voting {
     admin = msg.sender;
   }
 
+
   /*
     * set chairman
   */
@@ -147,5 +148,24 @@ contract Voting {
     require(msg.sender == chairman, 'only chairman');
     _;
   }
+  /*
+    * vote
+  */
+  function vote(uint ballotId, uint choiceId) external onlyAuthorizedToVote() {
+    require(votingEnabled, "Voting is not enabled");
+    require(ballots[ballotId].choices[choiceId].id == choiceId, "Choice does not exist");
+    require(votes[msg.sender][ballotId] == false, 'You have already voted, voter can only vote once for a ballot');
+    votes[msg.sender][ballotId] = true;
+    ballots[ballotId].choices[choiceId].votes++;
+  }
+
+  function results(uint ballotId) 
+  view 
+  external 
+  returns(Choice[] memory) {
+  require(votingResult, 'cannot see the ballot result until Chairman or Teacher has it shared');
+  return ballots[ballotId].choices;
+}
+
 
 }

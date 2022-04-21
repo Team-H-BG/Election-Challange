@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "chain": "hardhat node --network hardhat",
+    "chain": "hardhat node --network hardhat --no-deploy",
     "compile": "hardhat compile",
     "deploy": "hardhat deploy --export-all ./frontend/src/contracts/hardhat_contracts.json",
     "accounts": "hardhat accounts",

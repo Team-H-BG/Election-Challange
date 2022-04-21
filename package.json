@@ -4,7 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "chain": "hardhat node --network hardhat --no-deploy",
+    "compile": "hardhat compile",
+    "deploy": "hardhat deploy --export-all ../react-app/src/contracts/hardhat_contracts.json",
+    "accounts": "hardhat accounts",
+    "balance": "hardhat balance",
+    "generate": "hardhat generate",
+    "account": "hardhat account",
+    "verify": "hardhat etherscan-verify --api-key M72G1HQ5A3C3YQ4DZWTNUP448R57AJPTGA"
   },
   "repository": {
     "type": "git",
@@ -26,6 +33,8 @@
     "hardhat": "^2.9.3"
   },
   "dependencies": {
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.0",
+    "ganache-cli": "^6.12.2",
+    "solidity-coverage": "^0.7.20"
   }
 }

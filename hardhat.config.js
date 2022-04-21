@@ -2,8 +2,12 @@ require("@nomiclabs/hardhat-waffle");
 require('dotenv').config();
 const fs = require("fs");
 require("@nomiclabs/hardhat-ethers");
+require("@nomiclabs/hardhat-etherscan");
 //require solidity-coverage
 require('solidity-coverage');
+// gas reporter
+require("hardhat-gas-reporter");
+
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -57,4 +61,5 @@ module.exports = {
       // your api key here.
       apiKey: "PSW8C433Q667DVEX5BCRMGNAH9FSGFZ7Q8",
     },
+    
 }

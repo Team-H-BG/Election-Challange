@@ -6,7 +6,7 @@ import React from "react";
 export default function Header() {
   return (
     <a href="https://github.com/Team-H-BG/Election-Challange" target="_blank" rel="noopener noreferrer">
-      <PageHeader title="🏗 scaffold-eth" subTitle="🖼 Election Challenge" style={{ cursor: "pointer" }} />
+      <PageHeader title="🏗 Team H" subTitle="🖼 Election Challenge" style={{ cursor: "pointer" }} />
     </a>
   );
 }

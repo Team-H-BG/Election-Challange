@@ -73,7 +73,40 @@ describe("Voting 🤖", function () {
             expect(status).to.equal(true);
         });
 
+        it("should be able to create ballot", async function () {
+
+            votingStatus = await votingContract.connect(chairman).createBallot("President", ["Buhari", "Osinbanjo"]);
+            // Expect the function to go through
+            const txResult = await votingStatus.wait();
+            expect(txResult.status).to.equal(1);
+        });
+
+        it("should be able to get ballot", async function () {
+            // create ballot
+            await votingContract.connect(chairman).createBallot("President", ["Buhari", "Osinbanjo"]);
+            
+            
+            // Expect the function to go through
+            votingStatus = await votingContract.connect(chairman).getBallot(0);
+            expect(votingStatus.id).to.equal(0);
+        });
+
+        it("should be able to vote", async function () {
+            // create ballot
+            await votingContract.connect(chairman).createBallot("President", ["Buhari", "Osinbanjo"]);
+            votingStatus = await votingContract.connect(chairman).setVotingStatus(true);
+            
+            // Expect the function to go through
+            votingStatus = await votingContract.connect(chairman).vote(0, 0);
+            const txResult = await votingStatus.wait();
+            expect(txResult.status).to.equal(1);
+        });
+
+
     })
+
+
+    
     
     
 

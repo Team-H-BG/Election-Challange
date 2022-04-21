@@ -33,6 +33,46 @@ describe("Voting 🤖", function () {
             expect(txResult.status).to.equal(1);
         });
 
+        it("Should be able to add teachers", async function () {
+            const addressList = [teacher.address];
+            contractFunction = await votingContract.connect(admin).addTeachers(addressList);
+            // Expect the function to go through
+            const txResult = await contractFunction.wait();
+            expect(txResult.status).to.equal(1);
+        });
+
+        it("should be able to add students", async function () {
+            const addressList = [student.address];
+            contractFunction = await votingContract.connect(admin).addStudents(addressList);
+            // Expect the function to go through
+            const txResult = await contractFunction.wait();
+            expect(txResult.status).to.equal(1);
+        });
+
+    })
+
+    describe("Chairman", function () {
+        beforeEach(async function () {
+            // create the smart contract object to test from
+            votingChairman = await votingContract.connect(admin).setChairman(chairman.address);
+        });
+
+        it("Should set voting status", async function () {
+            
+
+            votingStatus = await votingContract.connect(chairman).setVotingStatus(true);
+            // Expect the function to go through
+            const txResult = await votingStatus.wait();
+            expect(txResult.status).to.equal(1);
+        });
+
+        it("voting status should change", async function () {
+            votingStatus = await votingContract.connect(chairman).setVotingStatus(true);
+            // Expect the function to go through
+            const status = await votingContract.connect(chairman).getVotingStatus();
+            expect(status).to.equal(true);
+        });
+
     })
     
     

@@ -8,3 +8,26 @@ ZURI as an organisation needs to setup an election for leadership position in it
 - Only the chairman and teachers can setup and compile the result of the votes
 - Only the chairman can grant access for the vote to happen.(There should be enable and disable vote.). If vote is disabled, no voting should take place.
 - students should not see result of votes until made public by the other stakeholders
+
+
+Testing
+
+Coverage
+`
+npx hardhat coverage --network localhost
+`
+
+Gas report using test
+
+`
+yarn test
+`
+
+
+
+Deploy
+for localhost keep the same for rinkeby change in hardhat.config.js
+
+`
+yarn deploy
+`

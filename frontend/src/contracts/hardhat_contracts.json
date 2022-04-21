@@ -5,12 +5,37 @@
       "chainId": "4",
       "contracts": {
         "Voting": {
-          "address": "0x82F2Ed52788D5142fc1179b8BeA3A7044423f278",
+          "address": "0xD4827253B6d04A0Ecf57d6712525D666E1B7F41D",
           "abi": [
             {
               "inputs": [],
               "stateMutability": "nonpayable",
               "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "id",
+                  "type": "uint256"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "string",
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "string[]",
+                  "name": "choices",
+                  "type": "string[]"
+                }
+              ],
+              "name": "CreateBallot",
+              "type": "event"
             },
             {
               "inputs": [

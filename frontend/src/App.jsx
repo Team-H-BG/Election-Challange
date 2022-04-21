@@ -237,8 +237,8 @@ function App(props) {
   console.log("🤗 balance:", balance);
 
   // 📟 Listen for broadcast events
-  const transferEvents = useEventListener(readContracts, "Voting", "Transfer", localProvider, 1);
-  console.log("📟 Transfer events:", transferEvents);
+  const createBallotEvents = useEventListener(readContracts, "Voting", "CreateBallot", localProvider, 1);
+  console.log("📟 createBallot events:", createBallotEvents);
 
   //
   // 🧠 This effect will update yourCollectibles by polling when your balance changes
@@ -468,11 +468,29 @@ function App(props) {
     );
   }
 
- 
   const [transferToAddresses, setTransferToAddresses] = useState({});
   const [minting, setMinting] = useState(false);
   const [count, setCount] = useState(1);
+  const [ballotName, setballotName] = useState("");
+  const [ballotChoice, setballotChoice] = useState([]);
 
+  const submitBallotContract = async () => {
+    try {
+      const ballotChoiceArray = ballotChoice.split(",");
+      console.log("writeContracts", ballotChoiceArray);
+      waveTnx = await tx(writeContracts.Voting.createBallot(ballotName, ballotChoiceArray));
+
+      console.log("Minig..", waveTnx.hash);
+
+      await waveTnx.wait();
+      console.log("Minig---", waveTnx.hash);
+
+      setballotName("");
+      setballotChoice("");
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   return (
     <div className="App">
@@ -488,7 +506,7 @@ function App(props) {
               }}
               to="/"
             >
-              YourCollectibles
+              Ballots
             </Link>
           </Menu.Item>
           <Menu.Item key="/transfers">
@@ -498,7 +516,7 @@ function App(props) {
               }}
               to="/transfers"
             >
-              Transfers
+              Results
             </Link>
           </Menu.Item>
           <Menu.Item key="/ipfsup">
@@ -508,17 +526,7 @@ function App(props) {
               }}
               to="/ipfsup"
             >
-              IPFS Upload
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/ipfsdown">
-            <Link
-              onClick={() => {
-                setRoute("/ipfsdown");
-              }}
-              to="/ipfsdown"
-            >
-              IPFS Download
+              Create Ballot
             </Link>
           </Menu.Item>
           <Menu.Item key="/debugcontracts">
@@ -534,28 +542,51 @@ function App(props) {
         </Menu>
         <Switch>
           <Route exact path="/">
-            
             <div style={{ width: 640, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              sdsds
+              <List
+                bordered
+                dataSource={createBallotEvents}
+                renderItem={item => {
+                  return (
+                    <List.Item key={item[0] + "_" + item[1] + "_" + item.blockNumber + "_" + item.args[0].toNumber()}>
+                      <span style={{ fontSize: 16, marginRight: 8 }}>#{item.args[0].toNumber()}</span>
+                      <span style={{ fontSize: 16, marginRight: 8 }}>#{item.args[1].toString()}</span>
+                    </List.Item>
+                  );
+                }}
+              />
             </div>
           </Route>
 
           <Route path="/transfers">
-            <div style={{ width: 600, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              dfdfd
-            </div>
+            <div style={{ width: 600, margin: "auto", marginTop: 32, paddingBottom: 32 }}>dfdfd</div>
           </Route>
 
           <Route path="/ipfsup">
             <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
-              sdsd
-            </div>
-          </Route>
-          
-          <Route path="/ipfsdown">
-            <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
-              sdsdsd
-            </div>
+                Create Ballot
+                <label>Ballot Position:</label>
+                <Input type="text" placeholder="Ballot Position" onChange={e => setballotName(e.target.value)} value={ballotName} />
+
+                <br />
+
+                <label>Ballot Choices:</label>
+                <Input
+                  type="text"
+                  placeholder="choice1, choice2"
+                  onChange={e => setballotChoice(e.target.value)}
+                  value={ballotChoice}
+                />
+              </div>
+
+              <Button
+                  className="waveButton"
+                  style={{ margin: "10px", color: "green" }}
+                  onClick={submitBallotContract}
+                  disabled={!ballotName || !ballotChoice}
+                >
+                  Submit
+                </Button>
           </Route>
 
           <Route path="/debugcontracts">

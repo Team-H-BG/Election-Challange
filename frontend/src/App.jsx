@@ -1,6 +1,6 @@
 import Portis from "@portis/web3";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { Alert, Button, Card, Col, Input, List, Menu, Row } from "antd";
+import { Alert, Button, Card, Col, Input, List, Menu, Row, Radio, Space } from "antd";
 import "antd/dist/antd.css";
 import Authereum from "authereum";
 import {
@@ -473,6 +473,26 @@ function App(props) {
   const [count, setCount] = useState(1);
   const [ballotName, setballotName] = useState("");
   const [ballotChoice, setballotChoice] = useState([]);
+  const [choice, setChoice] = useState(0);
+  const [ballots, setBallots] = useState([]);
+
+  useEffect(() => {
+    updateBallots();
+  });
+
+  async function updateBallots() {
+    const nextBallotId = parseInt(useContractReader(readContracts, "Voting", "nextBallotId"));
+
+    const ballots = [];
+    for (let i = 0; i < nextBallotId; i++) {
+      const [ballot, hasVoted] = await Promise.all([
+        useContractReader(readContracts, "Voting", "getBallot", [i]),
+        useContractReader(readContracts, "Voting", "votes", [accounts[0], i]),
+      ]);
+      ballots.push({ ...ballot, hasVoted });
+    }
+    setBallots(ballots);
+  }
 
   const submitBallotContract = async () => {
     try {
@@ -487,6 +507,22 @@ function App(props) {
 
       setballotName("");
       setballotChoice("");
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const voteBallotContract = async ballotId => {
+    try {
+      console.log(ballotId);
+      // waveTnx = await tx(writeContracts.Voting.vote(ballotId, choice));
+
+      // console.log("Minig..", waveTnx.hash);
+
+      // await waveTnx.wait();
+      // console.log("Minig---", waveTnx.hash);
+
+      // setChoice(1);
     } catch (e) {
       console.log(e);
     }
@@ -536,7 +572,7 @@ function App(props) {
               }}
               to="/debugcontracts"
             >
-              Debug Contracts
+              Admin Control
             </Link>
           </Menu.Item>
         </Menu>
@@ -546,11 +582,27 @@ function App(props) {
               <List
                 bordered
                 dataSource={createBallotEvents}
-                renderItem={item => {
+                renderItem={(item, ballotIndex) => {
                   return (
                     <List.Item key={item[0] + "_" + item[1] + "_" + item.blockNumber + "_" + item.args[0].toNumber()}>
                       <span style={{ fontSize: 16, marginRight: 8 }}>#{item.args[0].toNumber()}</span>
                       <span style={{ fontSize: 16, marginRight: 8 }}>#{item.args[1].toString()}</span>
+                      <>
+                        <Radio.Group onChange={e => setChoice(e.target.value)} value={choice}>
+                          <Space direction="vertical">
+                            {item.args[2]?.map((item, index) => (
+                              <Radio value={index}>{item}</Radio>
+                            ))}
+                          </Space>
+                        </Radio.Group>
+                        <Button
+                          className="waveButton"
+                          style={{ margin: "10px", color: "green" }}
+                          onClick={voteBallotContract(ballotIndex)}
+                        >
+                          Submit
+                        </Button>
+                      </>
                     </List.Item>
                   );
                 }}
@@ -564,29 +616,32 @@ function App(props) {
 
           <Route path="/ipfsup">
             <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
-                Create Ballot
-                <label>Ballot Position:</label>
-                <Input type="text" placeholder="Ballot Position" onChange={e => setballotName(e.target.value)} value={ballotName} />
+              Create Ballot
+              <label>Ballot Position:</label>
+              <Input
+                type="text"
+                placeholder="Ballot Position"
+                onChange={e => setballotName(e.target.value)}
+                value={ballotName}
+              />
+              <br />
+              <label>Ballot Choices:</label>
+              <Input
+                type="text"
+                placeholder="choice1, choice2"
+                onChange={e => setballotChoice(e.target.value)}
+                value={ballotChoice}
+              />
+            </div>
 
-                <br />
-
-                <label>Ballot Choices:</label>
-                <Input
-                  type="text"
-                  placeholder="choice1, choice2"
-                  onChange={e => setballotChoice(e.target.value)}
-                  value={ballotChoice}
-                />
-              </div>
-
-              <Button
-                  className="waveButton"
-                  style={{ margin: "10px", color: "green" }}
-                  onClick={submitBallotContract}
-                  disabled={!ballotName || !ballotChoice}
-                >
-                  Submit
-                </Button>
+            <Button
+              className="waveButton"
+              style={{ margin: "10px", color: "green" }}
+              onClick={submitBallotContract}
+              disabled={!ballotName || !ballotChoice}
+            >
+              Submit
+            </Button>
           </Route>
 
           <Route path="/debugcontracts">

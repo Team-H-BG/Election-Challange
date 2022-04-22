@@ -12,7 +12,7 @@ require("@nomiclabs/hardhat-etherscan");
 //require solidity-coverage
 require('solidity-coverage');
 // gas reporter
-require("hardhat-gas-reporter");
+// require("hardhat-gas-reporter");
 
 
 

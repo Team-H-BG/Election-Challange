@@ -12,7 +12,7 @@
     "balance": "hardhat balance",
     "generate": "hardhat generate",
     "account": "hardhat account",
-    "verify": "hardhat etherscan-verify --api-key M72G1HQ5A3C3YQ4DZWTNUP448R57AJPTGA"
+    "verify": "hardhat etherscan-verify --api-key NSBA85CRTYBH76BS34WDH9GM7C8ZS1X655"
   },
   "repository": {
     "type": "git",

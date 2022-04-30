@@ -55,18 +55,25 @@ contract Voting {
   /**
     @notice Events to log public library
     */
-    event CreateBallot(uint id, string name, string[] choices);
+  
+  event CreateBallot(uint id, string name, string[] choices);
+  event Vote(address voter);
+  event VotingStatus(bool votingStatus);
+  event VotingResult(bool votingStatus);
+  event ChairmanChange(address chairman, address newChairman);
+
 
   constructor() {
-    admin = msg.sender;
+    chairman = msg.sender;
   }
 
 
   /*
     * set chairman
   */
-  function setChairman(address _chairman) external onlyAdmin() {
+  function setChairman(address _chairman) external onlyChairman() {
     chairman = _chairman;
+    emit ChairmanChange(chairman, _chairman);
   }
 
   /*
@@ -75,6 +82,7 @@ contract Voting {
   function setVotingStatus(bool _votingStatus) external {
     require(msg.sender == chairman);
     votingEnabled = _votingStatus;
+    emit VotingStatus(_votingStatus);
   }
 
   /*
@@ -89,6 +97,7 @@ contract Voting {
   */
   function setVotingResultStatus(bool _votingResult) external onlyAuthorized() {
     votingResult = _votingResult;
+    emit VotingResult(_votingResult);
   }
 
     /*
@@ -101,7 +110,7 @@ contract Voting {
   /*
     * add teacher
   */
-  function addTeachers(address[] calldata _teachers) external onlyAdmin() {
+  function addTeachers(address[] calldata _teachers) external onlyChairman() {
     for(uint i = 0; i < _teachers.length; i++) {
         teachers[_teachers[i]] = true;
     }
@@ -110,7 +119,7 @@ contract Voting {
   /*
     * add stuudent
   */
-  function addStudents(address[] calldata _students) external onlyAdmin() {
+  function addStudents(address[] calldata _students) external onlyChairman() {
     for(uint i = 0; i < _students.length; i++) {
         students[_students[i]] = true;
     }
@@ -151,6 +160,8 @@ contract Voting {
     require(votes[msg.sender][ballotId] == false, 'You have already voted, voter can only vote once for a ballot');
     votes[msg.sender][ballotId] = true;
     ballots[ballotId].choices[choiceId].votes++;
+    emit Vote(msg.sender);
+
   }
 
   function results(uint ballotId)  view external returns(Choice[] memory) {
@@ -158,10 +169,7 @@ contract Voting {
     return ballots[ballotId].choices;
   }
 
-  modifier onlyAdmin() {
-    require(msg.sender == admin, 'only admin');
-    _;
-  }
+
 
   modifier onlyAuthorized() {
     require((msg.sender == chairman) || (teachers[msg.sender] == true), 'only the chairman or authorized teacher');

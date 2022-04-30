@@ -4,12 +4,19 @@ pragma solidity ^0.8.5;
 
 contract Voting {
 
-  struct Voter {
-    uint vote;
-    bool voted;
-    uint weight;
-    string voterType;
-  }
+  /*
+    * get teachers list
+  */
+  mapping(address => bool) public teachers;
+
+  /*
+    * get student list
+  */
+  mapping(address => bool) public students;
+
+  address public admin;
+
+  address public chairman;
 
   /*
     * get voting status
@@ -22,45 +29,44 @@ contract Voting {
   bool votingResult;
 
 
-  // Proposal
-  struct Proposal {
+  /*
+    * struct for voting choices
+  */
+
+  struct Choice {
+    uint id;
     string name;
-    uint voteCount;
+    uint votes;
   }
 
-  Proposal[] public proposals;
-
-  mapping(address => Voter) public voters; // voters get address as key and Voter for value
-
-  address public chairman;
-
-  event Vote(address voter);
-  event VoterAdded(address voter, string voterType);
-  event VotingStatus(bool votingStatus);
-  event VotingResult(bool votingStatus);
-  event ChairmanChange(address chairman, address newChairman);
-
-  constructor(string[] memory proposalNames) {
-
-    chairman = msg.sender;
-
-    voters[chairman].weight = 8;
-
-    for (uint i = 0; i < proposalNames.length; i++) {
-      proposals.push(Proposal({
-        name: proposalNames[i],
-        voteCount: 0
-      }));
-    }
-    chairman = msg.sender;
+  /*
+    * struct for voting Ballot
+  */
+  struct Ballot {
+    uint id;
+    string name;
+    Choice[] choices;
   }
+
+  mapping(uint => Ballot) ballots;
+  uint nextBallotId;
+  mapping(address => mapping(uint => bool)) votes;
+
+  /**
+    @notice Events to log public library
+    */
+    event CreateBallot(uint id, string name, string[] choices);
+
+  constructor() {
+    admin = msg.sender;
+  }
+
 
   /*
     * set chairman
   */
-  function changeChairman(address _chairman) external onlyChairman() {
+  function setChairman(address _chairman) external onlyAdmin() {
     chairman = _chairman;
-    emit ChairmanChange(msg.sender, _chairman);
   }
 
   /*
@@ -69,7 +75,6 @@ contract Voting {
   function setVotingStatus(bool _votingStatus) external {
     require(msg.sender == chairman);
     votingEnabled = _votingStatus;
-    emit VotingStatus(_votingStatus);
   }
 
   /*
@@ -82,9 +87,8 @@ contract Voting {
   /*
     * set voting result
   */
-  function setVotingResultStatus(bool _votingResult) external onlyChairman() {
+  function setVotingResultStatus(bool _votingResult) external onlyAuthorized() {
     votingResult = _votingResult;
-    emit VotingResult(_votingResult);
   }
 
     /*
@@ -94,71 +98,83 @@ contract Voting {
     return votingResult;
   }
 
-
-  // autheticate voters
-  function addStudent(address _voter) external onlyChairman {
-    require(msg.sender == chairman, 'Only chairman can give right to vote');
-    require(!voters[_voter].voted, 'Voter already voted');
-    require(voters[_voter].weight == 0);
-    voters[_voter].voterType = "student";
-    voters[_voter].weight = 2;
-    emit VoterAdded(_voter, "student");
+  /*
+    * add teacher
+  */
+  function addTeachers(address[] calldata _teachers) external onlyAdmin() {
+    for(uint i = 0; i < _teachers.length; i++) {
+        teachers[_teachers[i]] = true;
+    }
   }
 
-    // autheticate voters
-  function addTeacher(address _voter) external onlyChairman {
-    require(msg.sender == chairman, 'Only chairman can give right to vote');
-    require(!voters[_voter].voted, 'Voter already voted');
-    require(voters[_voter].weight == 0);
-    voters[_voter].voterType = "teacher";
-    voters[_voter].weight = 4;
-    emit VoterAdded(_voter, "teacher");
+  /*
+    * add stuudent
+  */
+  function addStudents(address[] calldata _students) external onlyAdmin() {
+    for(uint i = 0; i < _students.length; i++) {
+        students[_students[i]] = true;
+    }
   }
 
-  // Get Proposal
-function getProposals()public view returns( Proposal  [] memory){
-    return proposals;
-}
+  /*
+    * create ballot
+  */
+  function createBallot(
+    string memory name,
+    string[] memory _choices
+    ) public onlyChairman() {
+      ballots[nextBallotId].id = nextBallotId;
+      ballots[nextBallotId].name = name;
+      for(uint i = 0; i < _choices.length ; i++) {
+        ballots[nextBallotId].choices.push(Choice(i, _choices[i], 0));
+      }
+    emit CreateBallot(nextBallotId, name, _choices);
+    nextBallotId++;
+    
+  }
+
+  /*
+    * get ballot
+  */
+
+  function getBallot(uint _id) external view returns (Ballot memory) {
+    return ballots[_id];
+  }
 
 
   /*
     * vote
   */
-  function vote(uint proposal) external {
+  function vote(uint ballotId, uint choiceId) external onlyAuthorizedToVote() {
     require(votingEnabled, "Voting is not enabled");
-    Voter storage sender = voters[msg.sender];
-    require(sender.weight !=0, 'Has no right to vote');
-    require(!sender.voted, 'Voter already voted');
-    sender.voted = true;
-    sender.vote = proposal;
-
-    proposals[proposal].voteCount =  proposals[proposal].voteCount + sender.weight;
-    emit Vote(msg.sender);
-
+    require(ballots[ballotId].choices[choiceId].id == choiceId, "Choice does not exist");
+    require(votes[msg.sender][ballotId] == false, 'You have already voted, voter can only vote once for a ballot');
+    votes[msg.sender][ballotId] = true;
+    ballots[ballotId].choices[choiceId].votes++;
   }
 
-  // show results
-
-  function winningProposal() public view returns (uint winningProposal_) {
-    uint winningVoteCount = 0;
-
-    for (uint i = 0; i < proposals.length; i++) {
-      if (proposals[i].voteCount > winningVoteCount) {
-        winningVoteCount = proposals[i].voteCount;
-        winningProposal_ = i;
-      }
-    }
+  function results(uint ballotId)  view external returns(Choice[] memory) {
+    require(votingResult, 'cannot see the ballot result until Chairman or Teacher has it shared');
+    return ballots[ballotId].choices;
   }
 
-  function winningProposalName() public view returns (string memory winningProposalName_) {
-    require(votingResult, "Voting Result is not open");
-    winningProposalName_ = proposals[winningProposal()].name;
-
+  modifier onlyAdmin() {
+    require(msg.sender == admin, 'only admin');
+    _;
   }
 
+  modifier onlyAuthorized() {
+    require((msg.sender == chairman) || (teachers[msg.sender] == true), 'only the chairman or authorized teacher');
+    _;
+  }
+
+    modifier onlyAuthorizedToVote() {
+    require((msg.sender == chairman) || (teachers[msg.sender] == true) || (students[msg.sender] == true), 'only the chairman or authorized teacher');
+    _;
+  }
 
   modifier onlyChairman() {
-    require(msg.sender == chairman, 'only chairman can make this action');
+    require(msg.sender == chairman, 'only chairman');
     _;
   }
 

@@ -34,6 +34,11 @@ contract Voting {
 
   address public chairman;
 
+  event Vote(address voter);
+  event VoterAdded(address voter, string voterType);
+  event VotingStatus(bool votingStatus);
+  event VotingResult(bool votingStatus);
+  event ChairmanChange(address chairman, address newChairman);
 
   constructor(string[] memory proposalNames) {
 
@@ -55,6 +60,7 @@ contract Voting {
   */
   function changeChairman(address _chairman) external onlyChairman() {
     chairman = _chairman;
+    emit ChairmanChange(msg.sender, _chairman);
   }
 
   /*
@@ -63,6 +69,7 @@ contract Voting {
   function setVotingStatus(bool _votingStatus) external {
     require(msg.sender == chairman);
     votingEnabled = _votingStatus;
+    emit VotingStatus(_votingStatus);
   }
 
   /*
@@ -77,6 +84,7 @@ contract Voting {
   */
   function setVotingResultStatus(bool _votingResult) external onlyChairman() {
     votingResult = _votingResult;
+    emit VotingResult(_votingResult);
   }
 
     /*
@@ -94,6 +102,7 @@ contract Voting {
     require(voters[_voter].weight == 0);
     voters[_voter].voterType = "student";
     voters[_voter].weight = 2;
+    emit VoterAdded(_voter, "student");
   }
 
     // autheticate voters
@@ -103,6 +112,7 @@ contract Voting {
     require(voters[_voter].weight == 0);
     voters[_voter].voterType = "teacher";
     voters[_voter].weight = 4;
+    emit VoterAdded(_voter, "teacher");
   }
 
   // Get Proposal
@@ -117,15 +127,35 @@ function getProposals()public view returns( Proposal  [] memory){
   function vote(uint proposal) external {
     require(votingEnabled, "Voting is not enabled");
     Voter storage sender = voters[msg.sender];
-        require(sender.weight !=0, 'Has no right to vote');
+    require(sender.weight !=0, 'Has no right to vote');
     require(!sender.voted, 'Voter already voted');
     sender.voted = true;
     sender.vote = proposal;
 
     proposals[proposal].voteCount =  proposals[proposal].voteCount + sender.weight;
+    emit Vote(msg.sender);
+
   }
 
-  
+  // show results
+
+  function winningProposal() public view returns (uint winningProposal_) {
+    uint winningVoteCount = 0;
+
+    for (uint i = 0; i < proposals.length; i++) {
+      if (proposals[i].voteCount > winningVoteCount) {
+        winningVoteCount = proposals[i].voteCount;
+        winningProposal_ = i;
+      }
+    }
+  }
+
+  function winningProposalName() public view returns (string memory winningProposalName_) {
+    require(votingResult, "Voting Result is not open");
+    winningProposalName_ = proposals[winningProposal()].name;
+
+  }
+
 
   modifier onlyChairman() {
     require(msg.sender == chairman, 'only chairman can make this action');
